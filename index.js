@@ -1,197 +1,44 @@
 ﻿import express from "express";
 import { promises as fs } from "fs";
 import path from "path";
-
-const app = express();
-const PORT = 8080;
-
-
-app.use(express.json());
-
-
-const productsRouter = express.Router();
-app.use("/api/products", productsRouter);
-
-
-const cartsRouter = express.Router();
-app.use("/api/carts", cartsRouter);
-
-
-const productsFile = path.join("data", "products.json");
-const readProducts = async () => {
-    try {
-        const data = await fs.readFile(productsFile, "utf-8");
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-import express from "express";
-import { promises as fs } from "fs";
-import path from "path";
 import http from "http";
 import { Server as IOServer } from "socket.io";
 import { engine } from "express-handlebars";
+import productsRouter from "./src/routes/products.router.js";
+import cartsRouter from "./src/routes/carts.router.js";
+import viewsRouter from "./src/routes/views.router.js";
+import ProductManager from "./ProductManager.js";
+process.on('uncaughtException', (err) => { console.error('Uncaught Exception:', err); });
+process.on('unhandledRejection', (reason) => { console.error('Unhandled Rejection:', reason); });
 
 const app = express();
-const PORT = 8080;
+const PORT_BASE = 8080;
+let currentPort = PORT_BASE;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Handlebars setup
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(process.cwd(), "views"));
 
-// Static files
 app.use(express.static(path.join(process.cwd(), "public")));
+app.use("/routes", express.static(path.join(process.cwd(), "src", "routes")));
 
 const httpServer = http.createServer(app);
 const io = new IOServer(httpServer);
 
-const productsRouter = express.Router();
+app.set('io', io);
+
 app.use("/api/products", productsRouter);
-
-const cartsRouter = express.Router();
 app.use("/api/carts", cartsRouter);
-
-const viewsRouter = express.Router();
 app.use("/", viewsRouter);
 
-const productsFile = path.join("data", "products.json");
-const readProducts = async () => {
-    try {
-        const data = await fs.readFile(productsFile, "utf-8");
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-};
-
-const writeProducts = async (products) => {
-    await fs.writeFile(productsFile, JSON.stringify(products, null, 2));
-};
-
-// API endpoints
-productsRouter.get("/", async (req, res) => {
-    try {
-        const products = await readProducts();
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ error: "Error al leer los productos" });
-    }
-});
-
-productsRouter.post("/", async (req, res) => {
-    try {
-        const products = await readProducts();
-        const {
-            title,
-            description,
-            code,
-            price,
-            status = true,
-            stock,
-            category,
-            thumbnails = []
-        } = req.body;
-
-        if (!title || !description || !code || !price || stock == null || !category) {
-            return res.status(400).json({ error: "Todos los campos son obligatorios" });
-        }
-
-        if (products.some(p => p.code === code)) {
-            return res.status(400).json({ error: "Ya existe un producto con ese código" });
-        }
-
-        const newProduct = {
-            id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
-            title,
-            description,
-            code,
-            price,
-            status,
-            stock,
-            category,
-            thumbnails
-        };
-
-        products.push(newProduct);
-        await writeProducts(products);
-
-        // Emit updated products list to all connected sockets
-        io.emit("products", products);
-
-        res.status(201).json(newProduct);
-    } catch (error) {
-        res.status(500).json({ error: "Error al crear el producto" });
-    }
-});
-
-productsRouter.delete("/:id", async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        let products = await readProducts();
-        const initialLength = products.length;
-        products = products.filter(p => p.id !== id);
-        if (products.length === initialLength) {
-            return res.status(404).json({ error: "Producto no encontrado" });
-        }
-        await writeProducts(products);
-
-        // Emit updated products list to all connected sockets
-        io.emit("products", products);
-
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: "Error al eliminar el producto" });
-    }
-});
-
-const cartsFile = path.join("data", "carts.json");
-const readCarts = async () => {
-    try {
-        const data = await fs.readFile(cartsFile, "utf-8");
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-};
-
-const writeCarts = async (carts) => {
-    await fs.writeFile(cartsFile, JSON.stringify(carts, null, 2));
-};
-
-cartsRouter.post("/", async (req, res) => {
-    try {
-        const carts = await readCarts();
-        const newCart = {
-            id: carts.length > 0 ? Math.max(...carts.map(c => c.id)) + 1 : 1,
-            products: []
-        };
-
-        carts.push(newCart);
-        await writeCarts(carts);
-        res.status(201).json(newCart);
-    } catch (error) {
-        res.status(500).json({ error: "Error al crear el carrito" });
-    }
-});
-
-// Views
-viewsRouter.get("/", async (req, res) => {
-    const products = await readProducts();
-    res.render("home", { products });
-});
-
-viewsRouter.get("/realtimeproducts", async (req, res) => {
-    const products = await readProducts();
-    res.render("realTimeProducts", { products });
-});
+const productManager = new ProductManager(path.join("data", "products.json"));
 
 io.on("connection", (socket) => {
-    // Send current products upon connection
-    readProducts().then(products => {
+    console.log("Cliente conectado");
+    productManager.getProducts().then(products => {
         socket.emit("products", products);
     });
 });
@@ -199,6 +46,9 @@ io.on("connection", (socket) => {
 const initializeDataDir = async () => {
     try {
         await fs.mkdir("data", { recursive: true });
+
+        const productsFile = path.join("data", "products.json");
+        const cartsFile = path.join("data", "carts.json");
 
         if (!(await fs.stat(productsFile).catch(() => false))) {
             await fs.writeFile(productsFile, "[]");
@@ -213,9 +63,22 @@ const initializeDataDir = async () => {
 
 const startServer = async () => {
     await initializeDataDir();
-    httpServer.listen(PORT, () => {
-        console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    const listen = () => {
+        httpServer.listen(currentPort, () => {
+            console.log(`Servidor corriendo en http://localhost:${currentPort}`);
+        });
+    };
+    httpServer.on('error', (err) => {
+        if (err.code === 'EADDRINUSE' && currentPort === PORT_BASE) {
+            currentPort = PORT_BASE + 1;
+            console.log(`Puerto 8080 ocupado, usando ${currentPort}`);
+            setTimeout(listen, 100);
+        } else {
+            console.error('Error al iniciar servidor', err);
+            process.exit(1);
+        }
     });
+    listen();
 };
 
 startServer();

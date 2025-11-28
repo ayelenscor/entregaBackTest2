@@ -1,13 +1,27 @@
-<h1>Productos</h1>
-
-<a href="/realtimeproducts">Ver productos en tiempo real</a>
-
-{{#if products}}
-  <ul>
-    {{#each products}}
-      <li>{{this.title}} - ${{this.price}}</li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No hay productos por el momento.</p>
-{{/if}}
+<div class="container">
+  <h1>🛒 Tienda de Productos</h1>
+  
+  <a href="/realtimeproducts">⚡ Ver productos en tiempo real</a>
+  
+  {{#if products}}
+    <section>
+      <h2>Catálogo de Productos</h2>
+      <ul>
+        {{#each products}}
+          <li>
+            <div>
+              <strong>{{this.title}}</strong><br>
+              <small style="color: #666;">{{this.description}}</small>
+            </div>
+            <div style="text-align: right;">
+              <strong style="color: #667eea; font-size: 1.2em;">${{this.price}}</strong><br>
+              <small>Stock: {{this.stock}}</small>
+            </div>
+          </li>
+        {{/each}}
+      </ul>
+    </section>
+  {{else}}
+    <p>No hay productos por el momento.</p>
+  {{/if}}
+</div>

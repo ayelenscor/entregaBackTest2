@@ -2,7 +2,7 @@
   {
     "id": 1,
     "title": "Zapatillas Running Pro",
-    "description": "Zapatillas profesionales para marat�n",
+    "description": "Zapatillas profesionales para maratón",
     "code": "ZAP001",
     "price": 29999.99,
     "status": true,
@@ -16,8 +16,8 @@
   },
   {
     "id": 2,
-    "title": "Camiseta Selecci�n 2023",
-    "description": "Camiseta oficial selecci�n argentina",
+    "title": "Camiseta Selección 2023",
+    "description": "Camiseta oficial selección argentina",
     "code": "CAM001",
     "price": 25999.99,
     "status": true,
@@ -30,8 +30,8 @@
   },
   {
     "id": 3,
-    "title": "Pelota F�tbol Profesional",
-    "description": "Pelota oficial torneo primera divisi�n",
+    "title": "Pelota Fútbol Profesional",
+    "description": "Pelota oficial torneo primera división",
     "code": "PEL001",
     "price": 18999.99,
     "status": true,
@@ -88,7 +88,7 @@
   {
     "id": 7,
     "title": "Short Running Transpirable",
-    "description": "Short deportivo con tecnolog�a dry-fit",
+    "description": "Short deportivo con tecnología dry-fit",
     "code": "SHO001",
     "price": 8999.99,
     "status": true,
@@ -101,7 +101,7 @@
   },
   {
     "id": 8,
-    "title": "Botines F�tbol Profesional",
+    "title": "Botines Fútbol Profesional",
     "description": "Botines de cuero con tapones intercambiables",
     "code": "BOT001",
     "price": 34999.99,
@@ -116,7 +116,7 @@
   {
     "id": 9,
     "title": "Medias Deportivas Pack x3",
-    "description": "Pack de medias deportivas ????deslizantes",
+    "description": "Pack de medias deportivas antideslizantes",
     "code": "MED001",
     "price": 4999.99,
     "status": true,
@@ -128,44 +128,28 @@
   },
   {
     "id": 10,
-    "title": "Banda El�stica Resistencia",
-    "description": "Set de bandas el�sticas con diferentes resistencias",
-    "code": "BAN001",
-    "price": 6999.99,
+    "title": "camiseta de boca",
+    "description": "talle M",
+    "code": "456655",
+    "price": 34000,
     "status": true,
-    "stock": 45,
-    "category": "Equipamiento",
+    "stock": 1,
+    "category": "deportivo",
     "thumbnails": [
-      "img/bandas1.jpg",
-      "img/bandas2.jpg"
+      "url2"
     ]
   },
   {
     "id": 11,
-    "title": "Guantes de Boxeo",
-    "description": "Guantes profesionales de cuero",
-    "code": "GUA001",
-    "price": 19999.99,
+    "title": "zapatillas runner",
+    "description": "mujer",
+    "code": "54545",
+    "price": 50000,
     "status": true,
-    "stock": 30,
-    "category": "Boxeo",
+    "stock": 4,
+    "category": "calzado femenino",
     "thumbnails": [
-      "img/guantes1.jpg",
-      "img/guantes2.jpg"
-    ]
-  },
-  {
-    "id": 12,
-    "title": "Botines de Fútbol",
-    "description": "Botines profesionales de cuero",
-    "code": "BOT002",
-    "price": 34999.99,
-    "status": true,
-    "stock": 25,
-    "category": "Calzado",
-    "thumbnails": [
-      "img/botines1.jpg",
-      "img/botines2.jpg"
+      "url1"
     ]
   }
 ]
